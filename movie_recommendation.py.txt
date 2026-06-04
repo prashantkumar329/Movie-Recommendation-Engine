@@ -1,0 +1,81 @@
+"""
+CODTECH AI Internship
+
+Name: Prashant Kumar
+Intern ID: CITS3246
+
+Project Title: Movie Recommendation Engine
+
+Description:
+This project recommends movies based on content similarity
+using Machine Learning and Natural Language Processing.
+"""
+
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Sample Movie Dataset
+movies = pd.DataFrame({
+    'title': [
+        'Avatar',
+        'Titanic',
+        'The Avengers',
+        'Iron Man',
+        'The Dark Knight',
+        'Batman Begins',
+        'Inception',
+        'Interstellar',
+        'Doctor Strange',
+        'Thor'
+    ],
+    'genre': [
+        'Action Adventure Sci-Fi',
+        'Romance Drama',
+        'Action Superhero',
+        'Action Superhero',
+        'Action Crime Drama',
+        'Action Crime',
+        'Sci-Fi Thriller',
+        'Sci-Fi Adventure',
+        'Fantasy Superhero',
+        'Action Fantasy'
+    ]
+})
+
+# Convert genres into numerical vectors
+cv = CountVectorizer()
+count_matrix = cv.fit_transform(movies['genre'])
+
+# Calculate similarity
+similarity = cosine_similarity(count_matrix)
+
+def recommend(movie_name):
+    movie_name = movie_name.lower()
+
+    movie_indices = pd.Series(
+        movies.index,
+        index=movies['title'].str.lower()
+    )
+
+    if movie_name not in movie_indices:
+        print("Movie not found in database.")
+        return
+
+    idx = movie_indices[movie_name]
+
+    scores = list(enumerate(similarity[idx]))
+    scores = sorted(scores, key=lambda x: x[1], reverse=True)
+
+    print(f"\nMovies recommended for '{movies.iloc[idx]['title']}':\n")
+
+    count = 0
+    for movie in scores[1:]:
+        print(movies.iloc[movie[0]]['title'])
+        count += 1
+        if count == 5:
+            break
+
+# User Input
+movie = input("Enter Movie Name: ")
+recommend(movie)
